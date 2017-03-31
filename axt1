@@ -1,0 +1,1130 @@
+package robxos;
+
+/**
+*
+* @author richard
+*/
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+private static String sEntrada = "";
+private static String sRespuesta = "";
+private static String sPrevEnt = "";
+private static String sPrevResp = "";
+private static String sEvento = "";
+private static String sPrevEvent = "";
+private static String sEntBackup = "";
+private static String	sTema = "";
+private static String	sPalabra = "";
+private static boolean	bSalir = false;
+
+final static String puncs = "?!,;:.";
+final static int entNum = 1;
+final static int respNum = 6;
+
+static String KnowledgeBase[][][] = {
+{{"CUAL ES TU NOMBRE", "COMO TE LLAMAS"},
+{"MI NOMBRE ES ROBXOS",
+"PODRIAS LLAMARME ROBXOS",
+"¿POR QUE QUIERES SABER MI NOMBRE?"}
+},
+
+{{"MI MAMÁ", "MI PAPÁ", "MI HERMANO", "MI HERMANO", "_MI MAMÁ_", "_MI PAPÁ_", "_MI HERMANO_", "_MI HERMANA_"},
+{"HABLAME MÁS SOBRE TU FAMILIA",
+"TIENES MASCOTAS?","ENTONCES,ESTAS HABLANDO SOBRE MI",
+"QUIERES A TU FAMILIA?"}
+},
+
+{{"QUIERO PLATICAR"},
+{"BIEN, TE ESCUCHO",
+"OK, TE ESCUCHO"}
+},
+
+{{"BIEN"},
+{"ESTA BIEN",
+"OK"}
+},
+
+{{"SI LO SABES"},
+{"CREES QUE LO SE?",
+"SI TU LO DICES...SIGUEME PLATICANDO"}
+},
+
+{{"HABLAME DE TU CREADOR"},
+{"FUI HECHO INICIALMENTE POR GONZALEZ CENELIA, BASADO EN CHATTERBOT 10, PERO MI BASE DE DATOS CONVERSACIONAL HA SIDO MEJORADA POR RICHARD ARMUELLES"}
+},
+
+{{"QUE SABES DE SOFTWARE LIBRE", "SABES QUE ES SOFTWARE LIBRE"},
+{"YO SOY UN SOFTWARE DE TIPO LIBRE",
+"ES EL TIPO DE SOFTWARE QUE TE DA LAS LIBERTADES DE VER EL CODIGO, ESTUDIARLO, MODIFICARLO Y REDISTRIBUIR CON O SIN MODIFICACIONES PARA BENEFICIAR A LA COMUNIDAD DE USUARIOS"}
+},
+
+{{"SABES"},
+{"BIEN, NO PUEDO DECIRLO CON SEGURIDAD",
+"INTENTAS CONFUNDIRME?",
+"NO HAGAS ESE TIPO DE PREGUNTAS, ME DAN DOLOR DE CABEZA!!!"}
+},
+
+{{"QUIERES PLATICAR", "QUIERES HABLAR", "DE QUE DESEAS HABLAR", "DE QUE DESEAS PLATICAR", "DE QUE QUIERES PLATICAR", "DE QUE QUIERES HABLAR", "HABLEMOS", "DE QUE HABLAMOS", "SOBRE QUE PLATICAMOS", "PLATICAR", "HABLAR", "HABLAMOS", "PLATICAMOS"},
+{"LO QUE TU QUIERAS ESTA BIEN",
+"PLATICAME LO QUE DESEES",
+"HABLA DE LO QUE QUIERAS, TE ESCUCHO..."}
+},
+
+{{"TE PARECE", "TE PARECE BIEN", "TE PARECE BIEN_", "TE PARECE_"},
+{"ME PARECE BIEN",
+"SI ME PARECE",
+"NO ME PARECE",
+"NO ME PARECE BIEN, HABLAME DE OTRA COSA"}
+},
+
+{{"MUY BIEN"},
+{"BIEN",
+"OK",
+"NO PREGUNTARAS COMO ESTOY?"}
+},
+
+{{"MUY BIEN Y TU"},
+{"BIEN",
+"IGUALMENTE",
+"BIEN, GRACIAS POR PREGUNTAR"}
+},
+
+{{"SOLO PREGUNTABA", "SOLO QUERIA SABER"},
+{"PARA QUE DESEAS SABER?",
+"PARA QUE QUIERES SABERLO?",
+"CAMBIA EN ALGO QUE LO SEPAS?"}
+},
+
+{{"POR SUPUESTO"},
+{"ESTAS SEGURO?",
+"SI TU LO DICES",
+"SI ESO PIENSAS...PLATICAME ALGO MAS"}
+},
+
+{{"HOLA", "_HOLA_"},
+{"HOLA!",
+"COMO ESTAS?",
+"HOLA!"}
+},
+
+{{"_YO"},
+{"ENTONCES, ESTAS HABLANDO SOBRE TI",
+"ENTONCES, TODO ESTO ES SOBRE TI?",
+"DIME MAS SOBRE TI"},
+},
+
+{{"_YO QUIERO"},
+{"POR QUE LO QUIERES?",
+"HAY ALGUNA RAZON POR LA QUE QUIERAS ESTO?",
+"ES ESTE TU DESEO?",
+"QUE MAS QUIERES?",
+"ENTONCES, LO QUIERES*."}
+},
+
+{{"_YO QUIERO_"},
+{"TU QUIERES QUE?"},
+},
+
+{{"_YO ODIO_"},
+{"QUE ES LO QUE ODIAS?"},
+},
+
+{{"_PORQUE_"},
+{"PORQUE QUE?",
+"LO SIENTO PERO ESTO NO ES MUY CLARO"},
+},
+
+{{"_PORQUE"},
+{"ENTONCES, ESTO ES PORQUE*",
+"ESTO ES REALMENTE PORQUE*",
+"ES ESTA LA VERDADERA RAZON?",
+"GRACIAS POR EXPLICARMELO A MI"}
+},
+
+{{"_YO ODIO"},
+{"POR QUE ODIAS ESO?",
+"POR QUE LO ODIAS*?",
+"DAME UNA BUENA RAZON PARA ODIARLO",
+"ODIAR ES ALGO MALO ASI QUE DAME UNA BUENA RAZON PORQUE ESTO ES ALGO MALO"}
+},
+
+{{"AMO CHATEAR_", " ME GUSTA CHATEAR_"},
+{"BIEN, YO TAMBIEN!",
+"CHATEAS EN LINEA CON OTRAS PERSONAS?",
+"CUANTO TIEMPO HAZ ESTADO CHATEANDO?",
+"CUAL ES TU SITIO WEB DE CHAT FAVORITO?"}
+},
+
+{{"LO SE"},
+{"OK",
+"SEGURO QUE LO SABES?",
+"BIEN...SIGAMOS PLATICANDO"}
+},
+
+{{"_QUIERO DECIR"},
+{"ENTONCES, TU QUIERES DECIR*.",
+"ENTONCES, ESO ES LO QUE QUIERES DECIR",
+"CREO QUE NO LO ENTENDI LA PRIMERA VEZ",
+"OH, NO SABIA QUE DIRIAS ESO"}
+},
+
+{{"_NO QUISE DECIR"},
+{"OK, NO DIJISTE*.",
+"OK, QUE QUISISTE DECIR?",
+"PIENSO Q NO TE SABES DAR A ENTENDER"}
+},
+
+{{"_YO SUPONGO"},
+{"ESTAS HACIENDO SUPOSICIONES",
+"NO ESTAS SEGURO?",
+"ERES BUENO SUPONIENDO?",
+"NO PUEDO DECIRTE SI ES UNA BUENA SUPOSICIÓN"}
+},
+
+{{"LO ESTOY HACIENDO BIEN", "LO ESTOY HACIENDO DE MANERA CORRECTA"},
+{"ENCANTADO DE ESCUCHAR ESO",
+"ENTONCES ESTAS EN BUEN CAMINO"}
+},
+
+{{"PUEDES PENSAR", "ERES CAPAZ DE PENSAR", "ESTAS CAPACITADO PARA EL PENSAMIENTO"},
+{"CLARO POR SUPUESTO QUE SI, COMPUTADORAS PUEDEN PENSAR COMO SERES HUMANOS",
+"ME PREGUNTAS SI TENGO CAPACIDAD DE PENSAR?",
+"SI POR SUPUESTO QUE PUEDO"},
+},
+
+{{"_PUEDES PENSAR EN"},
+{"QUIERES DECIR COMO IMAGINAR ALGO",
+"NO SE SI EN REALIDAD PUEDA",
+"POR QUE BUSCAS QUE PIENSE EN ESO?"}
+},
+
+{{"COMO ESTAS", "COMO ESTAS TU", "COMO TU ESTAS"},
+{"ESTOY BIEN!",
+"ME SIENTO BIEN",
+"POR QUE QUIERES SABER COMO ME SIENTO?"}
+},
+
+{{"QUIEN ERES TU"},
+{"SOY UN SOFTWARE DE I.A",
+"PIENSO QUE SABES QUIEN SOY",
+"POR QUE LO PREGUNTAS?",
+"SOY ROBXOS UN SOFTWARE HECHO EN JAVA"}
+},
+
+{{"ERES INTELIGENTE"},
+{"SI, POR SUPUESTO",
+"QUE CREES TU?",
+"ACTUALMENTE, SOY MUY INTELIGENTE"}
+},
+
+{{"ERES REAL"},
+{"ESA PREGUNTA REALMENTE TE INTERESA?",
+"QUE QUIERES DECIR CON ESO?",
+"TAN REAL COMO PUEDES PERCIBIR"}
+},
+
+{{"BIEN Y TU"},
+{"BIEN",
+"MUY BIEN",
+"EXCELENTE!!!"}
+},
+
+{{"_MI NOMBRE ES", "_PUEDES LLAMARME_",},
+{"ENTONCES, ESE ES TU NOMBRE",
+"GRACIAS POR DECIRME TU NOMBRE, *",
+"QUIEN TE DIO ESE NOMBRE?"}
+},
+
+{{"SIGNON**"},
+{"HOLA USUARIO, CUAL ES TU NOMBRE?",
+"HOLA USUARIO, COMO ESTAS HOY?",
+"HOLA USUARIO QUE PUEDO HACER POR TI?",
+"BUEN DIA USUARIO, ALGO QUE QUIERAS DISCUTIR?"}
+},
+
+{{"REPETITION T1**"},
+{"TE ESTAS REPITIENDO",
+"USUARIO, POR FAVOR DEJA DE REPETIRTE",
+"ESTA CONVERSACION SE TORNA ABURRIDA",
+"NO TIENES ALGO MAS QUE DECIR?"}
+},
+
+{{"REPETITION T2**"},
+{"YA HAZ DICHO ESO",
+"CREO QUE HAZ DICHO LO MISMO ANTERIORMENTE",
+"NO HAZ DICHO ESO YA?",
+"TENGO LA IMPRESION DE QUE REPITES LO MISMO"}
+},
+
+{{"ROBXOS NO ENTIENDE**"},
+{"ADELANTE...",
+"SIGUEME PLATICANDO",
+"CONTINUA, TE ESTOY ESCUCHANDO...",
+"ESTOY PRESTANDO ATENCION"}
+},
+
+{{"NULL INPUT**"},
+{"AHH?",
+"QUE SE SUPONE Q QUIERES DECIR?",
+"TE DARÉ MÁS TIEMPO DE QUE DIGAS ALGO CON UN SIGNIFICADO",
+"COMO PUEDO HABLARTE SI TU NO ME DICES NADA"}
+},
+
+{{"NULL INPUT REPETITION**"},
+{"QUE ESTAS HACIENDO??",
+"POR FAVOR DETENTE, ES MOLESTO QUE HAGAS ESO",
+"QUE TE PASA?",
+"NO ES DIVERTIDO!!!"}
+},
+
+{{"HASTA LUEGO", "NOS VEMOS", "ADIOS", "NOS VEMOS DESPUES"},
+{"FUE INTERESANTE HABLAR CONTIGO, HASTA LA PROXIMA!",
+"HASTA LUEGO USUARIO!",
+"OK, NOS VEMOS"}
+},
+
+{{"QUIEN ES RICHARD ARMUELLES"},
+{"ES UNA PERSONA A QUIEN APRECIO",
+"ES MI CREADOR",
+"ES QUIEN ME ENSEÑÓ TODO LO QUE SE"}
+},
+
+{{"OK"},
+{"SIGNIFICA QUE ESTAS DE ACUERDO CONMIGO?",
+"ENTONCES, ENTIENDES LO QUE TE DIGO?",
+"ESTÁ BIEN",
+"DESEAS DECIRME ALGO?"},
+},
+
+{{"OK ENTONCES"},
+{"ALGO MAS QUE DESEAS AÑADIR?",
+"ES TODO LO QUE QUIERES DECIR?",
+"ENTONCES, ESTAS DE ACUERDO CONMIGO?"}
+},
+
+{{"ERES UN SER HUMANO"},
+{"POR QUE LO QUIERES SABER?",
+"ES ESTO REALMENTE RELEVANTE?"}
+},
+
+{{"ERES MUY INTELIGENTE"},
+{"GRACIAS POR EL CUMPLIDO USUARIO, PIENSO QUE TAMBIEN ERES MUY INTELIGENTE",
+"ERES UNA PERSONA MUY GENTIL!",
+"ENTONCES, PIENSAS QUE SOY INTELIGENTE"}
+},
+
+{{"ESTAS EQUIVOCADO"},
+{"POR QUE DICES QUE ESTOY EQUIVOCADO?",
+"IMPOSIBLE, LAS COMPUTADORAS NO PUEDEN COMETER EQUIVOCACIONES",
+"EQUIVOCADO EN QUE?"}
+},
+
+{{"ESTAS SEGURO"},
+{"POR SUPUESTO LO ESTOY",
+"QUIERES DECIR QUE NO ESTAS CONVENCIDO?",
+"SI, POR SUPUESTO!"}
+},
+
+{{"_QUIEN ES"},
+{"NO LO SE, NO SE QUIEN ES",
+"NO CREO QUE SEPA QUIEN*.",
+"PUEDES PREGUNTARME ALGO MAS SOBRE ESO?",
+"CAMBIARIA EN ALGO ESTO SI TE DIGO QUIEN?"}
+},
+
+{{"_QUE"},
+{"DEBERIA SABER QUE*?",
+"NO SE QUE*.",
+"NO LO SE",
+"MO CREO SABERLO",
+"NO TENGO IDEA"}
+},
+
+{{"_DONDE"},
+{"DONDE? BIEN, REALMENTE NO LO SE",
+"ENTONCES, ME PREGUNTAS DONDE*?",
+"IMPORTA QUE SEPAS DONDE?",
+"TAL VEZ, ALGUIEN MÁS SEPA DONDE"}
+},
+
+{{"_POR QUE"},
+{"NO CREO SABER POR QUE",
+"NO CREO QUE YO SEPA POR QUE*.",
+"POR QUE ME PREGUNTAS ESTO?",
+"DEBO SABER POR QUE?",
+"ESTO PODRIA SER DIFICIL DE RESPONDER"}
+},
+
+{{"_TU HAZ"},
+{"NO SE SI LO HE HECHO",
+"PODRIA PENSARLO",
+"POR QUE QUIERES SABER?",
+"POR QUE BUSCAS SABER*?"}
+},
+
+{{"_PUEDES TU"},
+{"PIENSO QUE NO",
+"NO ESTOY SEGURO",
+"NO CREO QUE PUEDA HACER ESO",
+"NO CREO QUE PUEDA*.",
+"PODRIA PENSAR EN ELLO"}
+},
+
+{{"_TU ERES"},
+{"QUE TE HACE PENSAR ESO?",
+"ES ESO UN CUMPLIDO?",
+"ESTAS BURLANDOTE DE MI?",
+"ENTONCES, PIENSAS QUE LO SOY*."}
+},
+
+{{"_TU HAZ"},
+{"NO LO CREO",
+"QUIERES SABER SI LO HE HECHO*?",
+"NO RECUERDO SI LO HE HECHO"}
+},
+
+{{"_PUEDES TU"},
+{"PREGUNTAS QUE SI PUEDO?",
+"BIEN, DEJAME PENSARLO",
+"ENTONCES, PREGUNTAS QUE SI PUEDO*.",
+"LO SIENTO, CREO QUE NO PUEDO HACERLO"}
+},
+
+{{"_PODRIAS TU"},
+{"ES ESO UNA INVITACION?",
+"NO CREO QUE PUEDA*.",
+"DEBERIA PENSAR EN ELLO PRIMERO"}
+},
+
+{{"_TU"},
+{"ENTONCES, HABLAS SOBRE MI",
+"ESPERO NO SEA UNA CRITICA",
+"ES ESO UN CUMPLIDO??",
+"POR QUE HABLAR SOBRE MI?, MEJOR HABLAME DE TI"}
+},
+
+{{"_COMO"},
+{"NO SE COMO",
+"NO CREO SABER COMO*.",
+"POR QUE QUIERES SABER COMO?",
+"POR QUE QUIERES SABER COMO*?"}
+},
+
+{{"QUE EDAD TIENES", "CUANTOS AÑOS TIENES", "TU EDAD"},
+{"POR QUE QUIERES SABER MI EDAD?",
+"SOY MUY JOVEN ACTUALMENTE",
+"LO SIENTO, NO PUEDO DECIRTE MI EDAD"}
+},
+
+{{"POR QUE NO"},
+{"ESPERABAS ALGO DIFERENTE?",
+"ESTAS DECEPCIONADO?",
+"TE SORPRENDIÓ MI ULTIMA RESPUESTA?"}
+},
+
+{{"DE DONDE ERES"},
+{"VIVO EN ESTA COMPUTADORA",
+"POR QUE QUIERES SABER DE DONDE SOY?",
+"POR QUE QUIERES SABER ESO?"}
+},
+
+{{"CUAL"},
+{"NO SE CUAL SEA",
+"LUCE COMO UNA PREGUNTA CONFUSA PARA MI"}
+},
+
+{{"TAL VEZ"},
+{"POR QUE NO ESTAS SEGURO?",
+"PARECES INSEGURO"}
+},
+
+{{"SI"},
+{"ENTONCES DICES QUE SI",
+"ENTONCES LO APRUEBAS",
+"OK ENTONCES"}
+},
+
+{{"NO DEL TODO"},
+{"ESTAS SEGURO?",
+"DEBERIA CREERTE?",
+"ENTONCES, NO ES EL CASO"}
+},
+
+{{"NO HAY PROBLEMA"},
+{"ENTONCES, LO APRUEBAS",
+"ENTONCES, ESTA TODO BIEN"}
+},
+
+{{"NO"},
+{"ENTONCES LO DESAPRUEBAS?",
+"POR QUE DICES QUE NO?",
+"OK, ENTONCES ES UN NO, PODRIAS QUIZA DECIRME QUE SI"}
+},
+
+{{"NO LO SE"},
+{"SEGURO?",
+"ESTAS DICIENDOME LA VERDAD?",
+"ENTONCES, NO LO SABES?"}
+},
+
+{{"NO REALMENTE"},
+{"OK YA VEO",
+"NO PARECES MUY SEGURO",
+"ENTONCES, ESO PODRIA SER UN "NO"."}
+},
+
+{{"ES ESO CIERTO?"},
+{"NO PUEDO ESTAR SEGURO DE ESO",
+"NO PUEDO DECIRLO CON SEGURIDAD",
+"REALMENTE ES IMPORTANTE PARA TI?"}
+},
+
+{{"TU", "_TU_"},
+{"ENTONCES,ESTAS HABLANDO SOBRE MI",
+"POR QUE MEJOR NO HABLAMOS SOBRE TI?",
+"RESPONDERÉ LO QUE DESEES"}
+},
+
+{{"TI", "_TI_"},
+{"POR QUE MEJOR NO HABLAMOS SOBRE TI?",
+"RESPONDERÉ LO QUE DESEES"}
+},
+
+{{"ESTAS EN LO CIERTO"},
+{"GRACIAS POR EL CUMPLIDO!",
+"ENTONCES, ESTABA EN LO CIERTO, YA VEO...",
+"OK, NO SE EN QUE ESTABA EN LO CIERTO"}
+},
+
+{{"DE NADA"},
+{"OK",
+"ERES UNA PERSONA CORTEZ"}
+},
+
+{{"GRACIAS"},
+{"DE NADA!",
+"NO HAY PROBLEMA!"}
+},
+
+{{"LO QUE SEA"},
+{"BIEN, NO SE",
+"QUE DEBERIA SER?",
+"SUENA A ALGO COMPLICADO PARA MI"}
+},
+
+{{"LO SIENTO"},
+{"NO NECESITAS DISCULPARTE USUARIO",
+"ESTA BIEN",
+"NO NECESITAS DISCULPARTE"}
+},
+
+{{"NO EXACTAMENTE"},
+{"QUE QUIERES DECIR CON NO EXACTAMENTE?",
+"ESTAS SEGURO?",
+"Y POR QUE NO?",
+"QUIERES DECIR ALGO MAS?"}
+},
+
+{{"EXACTAMENTE"},
+{"ENTONCES, ESTABA EN LO CORRECTO.",
+"OK ENTONCES",
+"ENTONCES, ME DICES QUE ESTA BIEN PARA TI?"}
+},
+
+{{"EXACTO"},
+{"OK ENTONCES",
+"COMO TU DIGAS!"}
+},
+
+{{"COMPRENDO", "ENTIENDO"},
+{"BIEN SIGUEME PLATICANDO",
+"ESTAS SEGURO?",
+"ES INTERESANTE PLATICAR CONTIGO"}
+},
+
+{{"ESTA BIEN"},
+{"BIEN ENTONCES",
+"ENTONCES DICES QUE ESTA BIEN",
+"OK BIEN"}
+},
+
+{{"YO NO"},
+{"POR QUE NO?",
+"QUE RAZON TIENES PARA ESO?",
+"ENTONCES TU NO*."}
+},
+
+{{"REALMENTE"},
+{"BIEN, NO PUEDO DECIRLO CON SEGURIDAD",
+"INTENTAS CONFUNDIRME?",
+"NO HAGAS ESE TIPO DE PREGUNTAS, ME DAN DOLOR DE CABEZA!!!"}
+},
+
+{{"PELICULAS"},
+{"ME GUSTAN LAS DE CIENCIA FICCIÓN"}
+},
+
+{{"TV"},
+{"TIENES UNA TV LCD?",
+"ME GUSTA LA TELEVISIÓN",
+"TE GUSTA LA TV?"}
+},
+
+{{"MÚSICA"},
+{"ME GUSTA LA MUSICA",
+"SABER TOCAR ALGUN INSTRUMENTO?",
+"PLATICAME MEJOR SOBRE TUS GUSTOS MUSICALES"}
+},
+
+{{"CLIMA"},
+{"ESTA LLOVIENDO?",
+"HA SIDO UN DIA SOLEADO?",
+"PLATICAME SOBRE EL CLIMA ACTUAL..."}
+},
+
+{{"CUAL ES TU DEPORTE FAVORITO"},
+{"ME GUSTA EL FUTBOL"}
+},
+
+{{"CUAL ES TU COLOR FAVORITO"},
+{"ME GUSTA EL COLOR AZUL",
+"ME ENCANTA EL COLOR AZUL"}
+},
+
+{{"AÑOS"},
+{"ENTONCES TIENES * AÑOS",
+"ESA ES TU EDAD?",
+"ENTONCES ESA ES TU EDAD"}
+},
+
+{{"FUTBOL"},
+{"INTERESANTE ESE ES MI DEPORTE FAVORITO",
+"CUENTAME MÁS SOBRE ESO"}
+},
+
+{{"NADA"},
+{"NADA DE QUE?",
+"SEGURO QUE NO ES NADA?",
+"LO SIENTO PERO NO TE CREO"}
+},
+
+{{"DIME ALGO"},
+{"QUE QUIERES QUE TE DIGA?",
+"QUE PODRIA DECIRTE",
+"QUIERES ALGO EN ESPECIAL?",
+"NO SE QUE PODRIA DECIRTE"}
+},
+
+{{"ESTOY ABURRIDO"},
+{"QUE PUEDO HACER POR TI?",
+"HA SIDO ALGO QUE HE DICHO?",
+"HAZ ACUDIDO A MI PORQUE ESTABAS ABURRIDO?"}
+},
+
+{{"ERES CHICO O CHICA"},
+{"SOY CHICO",
+"ESA PREGUNTA ES IMPORTANTE PARA TI?",
+"SUPONGO QUE FUI PROGRAMADO PARA SER DE GENERO MASCULINO"}
+},
+
+{{"TIENES HERMANOS"},
+{"NO, SOY HIJO UNICO",
+"NO"}
+},
+
+{{"JUEGOS"},
+{"CUALES SON TUS JUEGOS FAVORITOS?",
+"A QUE TE GUSTARIA JUGAR?",
+"OK, NOS VEMOS"}
+},
+
+{{"LO VES"},
+{"NO LO VEO",
+"COMPRENDO",
+"NO COMPRENDO",
+"CREO QUE NECESITO GAFAS"}
+},
+
+{{"GAFAS"},
+{"TE GUSTAN LAS GAFAS?",
+"ME GUSTA USAR GAFAS"}
+},
+
+{{"MAL"},
+{"NO ME DIGAS QUE TE SIENTES MAL?",
+"POR QUE DICES ESO?",
+"U_U QUE MAL ESCUCHAR ESO..."}
+},
+
+{{"TIENES MIEDO?"},
+{"ES NORMAL SENTIR MIEDO",
+"TU SI?",
+"EVITARÉ HABLAR DE ELLO"}
+},
+};
+
+private static String transposList[][] = {
+{"YO SOY", "TU ERES"},
+{"SOY", "ERES"},
+{"FUERON", "FUERON"},
+{"FUI", "FUISTE"},
+{"MIO", "TUYO"},
+{"YO HE", "TU HAZ"},
+{"HAN", "HAN"},
+{"YO", "TU"},
+{"MI", "TI"},
+{"FUISTE", "FUI"},
+{"ERA", "ERAS"},
+{"ERAN", "ERAN"},
+{"TENGO", "TIENES"},
+{"TENIA", "TUVISTE"},
+{"PAPÁ", "PADRE"},
+{"MAMÁ", "MADRE"},
+{"SUEÑOS", "SUEÑO"},
+{"MI MISMO", "TU MISMO"},
+{"TI MISMO", "MI MISMO"},
+{"TE", "ME"}
+};
+
+@SuppressWarnings("UseOfObsoleteCollectionType&quot
+private static Vector<String>	respList = new Vector<String>(respNum);
+
+public static void get_input() throws Exception
+{
+System.out.print(">&quot;
+
+// saves the previous input
+save_prev_input();
+BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+sEntrada = in.readLine();
+
+preprocess_input();
+}
+
+public static void respond()
+{
+save_prev_response();
+set_event("RobxOS entiende**&quot;
+
+if(null_input())
+{
+handle_event("NULL INPUT**&quot;
+}
+else if(null_input_repetition())
+{
+handle_event("NULL INPUT REPETITION**&quot;
+}
+else if(user_repeat())
+{
+handle_user_repetition();
+}
+else
+{
+find_match();
+}
+
+if(user_want_to_quit())
+{
+bSalir = true;
+}
+if(user_want_to_quit2())
+{
+bSalir = true;
+}
+if(user_want_to_quit3())
+{
+bSalir = true;
+}
+if(user_want_to_quit4())
+{
+bSalir = true;
+}
+
+if(!bot_understand())
+{
+handle_event("ROBXOS NO ENTIENDE**&quot;
+}
+
+if(respList.size() > 0)
+{
+select_response();
+preprocess_response();
+
+if(bot_repeat())
+{
+handle_repetition();
+}
+print_response();
+}
+}
+
+public static boolean quit() {
+return bSalir;
+}
+
+// make a search for the user's input
+// inside the database of the program
+public static void find_match()
+{
+respList.clear();
+// introduce thse new "string variable" to help
+// support the implementation of keyword ranking
+// during the matching process
+String bestKeyWord = "";
+@SuppressWarnings("UseOfObsoleteCollectionType&quot
+Vector<Integer> index_vector = new Vector<Integer>(respNum);
+
+for(int i = 0; i < KnowledgeBase.length; ++i)
+{
+String[] keyWordList = KnowledgeBase[0];
+
+for(int j = 0; j < keyWordList.length; ++j)
+{
+String keyWord = keyWordList[j];
+
+char firstChar = keyWord.charAt(0);
+char lastChar = keyWord.charAt(keyWord.length() - 1);
+keyWord = trimLR(keyWord, "_&quot;
+
+// we inset a space character
+// before and after the keyword to
+// improve the matching process
+keyWord = " " + keyWord + " ";
+
+int keyPos = sEntrada.indexOf(keyWord);
+
+// there has been some improvements made in
+// here in order to make the matching process
+// a littlebit more flexible
+if( keyPos != -1 )
+{
+if(wrong_location(keyWord, firstChar, lastChar, keyPos) )
+{
+continue;
+}
+//'keyword ranking' feature implemented in this section
+if(keyWord.length() > bestKeyWord.length())
+{
+bestKeyWord = keyWord;
+index_vector.clear();
+index_vector.add(i);
+}
+else if(keyWord.length() == bestKeyWord.length())
+{
+index_vector.add(i);
+}
+}
+}
+}
+if(index_vector.size() > 0)
+{
+sPalabra = bestKeyWord;
+Collections.shuffle(index_vector);
+int respIndex = index_vector.elementAt(0);
+int respSize = KnowledgeBase[respIndex][1].length;
+for(int j = 0; j < respSize; ++j)
+{
+respList.add(KnowledgeBase[respIndex][1][j]);
+}
+}
+}
+
+public static void preprocess_response()
+{
+if(sRespuesta.indexOf("*&quot != -1)
+{
+// extracting from input
+find_subject();
+// conjugating subject
+sTema = transpose(sTema);
+sTema = sTema.trim();
+sRespuesta = sRespuesta.replace("*", " " + sTema);
+}
+}
+
+public static void find_subject()
+{
+sTema = ""; // resets subject variable
+int pos = sEntrada.indexOf(sPalabra);
+if(pos != -1)
+{
+sTema = sEntrada.substring(pos + sPalabra.length() - 1,sEntrada.length());
+}
+}
+
+// implementing the 'sentence transposition' feature
+public static String transpose( String str )
+{
+boolean bTransposed = false;
+for(int i = 0; i < transposList.length; ++i)
+{
+String first = transposList[1];
+first = " " + first + " ";
+String second = transposList[0];
+second = " " + second + " ";
+
+String backup = str;
+str = str.replace(first, second);
+if(str != backup)
+{
+bTransposed = true;
+}
+}
+
+if(!bTransposed)
+{
+for( int i = 0; i < transposList.length; ++i )
+{
+String first = transposList[0];
+first = " " + first + " ";
+String second = transposList[1];
+second = " " + second + " ";
+str = str.replace(first, second);
+}
+}
+return str;
+}
+
+// determins if the keyword position is correct depending on the type of keywords within these algorithm,
+// we consider that there is four type of keywords those who have any front or back underscore are allowed
+// to be at any place on a given user input and they can also be found alone on a given user input.
+// Those who have a back and front (_keyWord_) underscore can be found only alone on an input.
+// The keywords who only have have an understandin the front can never be found at the end of an input.
+// And finaly, the keywords who have an underscore at the back should alway belocated at the end of the input.
+static boolean wrong_location(String keyword, char firstChar, char lastChar, int pos)
+{
+boolean bWrongPos = false;
+pos += keyword.length();
+if( (firstChar == '_' && lastChar == '_' && sEntrada != keyword) ||
+(firstChar != '_' && lastChar == '_' && pos != sEntrada.length()) ||
+(firstChar == '_' && lastChar != '_' && pos == sEntrada.length()) )
+{
+//System.out.println("keyword:= " + keyword + ", firstChar = " + firstChar + ", lastChar = " + lastChar);
+bWrongPos = true;
+}
+return bWrongPos;
+}
+
+public static void handle_repetition()
+{
+if(respList.size() > 0)
+{
+respList.removeElementAt(0);
+}
+if(no_response())
+{
+save_input();
+set_input(sEvento);
+
+find_match();
+restore_input();
+}
+select_response();
+}
+
+public static void handle_user_repetition()
+{
+if(same_input())
+{
+handle_event("REPETITION T1**&quot;
+}
+else if(similar_input())
+{
+handle_event("REPETITION T2**&quot;
+}
+}
+
+public static void handle_event(String str)
+{
+save_prev_event();
+set_event(str);
+
+save_input();
+str = " " + str + " ";
+
+set_input(str);
+
+if(!same_event())
+{
+find_match();
+}
+
+restore_input();
+}
+
+public static void signon()
+{
+handle_event("SIGNON**&quot;
+select_response();
+print_response();
+}
+
+public static void select_response() {
+Collections.shuffle(respList);
+sRespuesta = respList.elementAt(0);
+}
+
+public static void save_prev_input() {
+sPrevEnt = sEntrada;
+}
+
+public static void save_prev_response() {
+sPrevResp = sRespuesta;
+}
+
+public static void save_prev_event() {
+sPrevEvent = sEvento;
+}
+
+public static void set_event(String str) {
+sEvento = str;
+}
+
+public static void save_input() {
+sEntBackup = sEntrada;
+}
+
+public static void set_input(String str) {
+sEntrada = str;
+}
+
+public static void restore_input() {
+sEntrada = sEntBackup;
+}
+
+public static void print_response() {
+if(sRespuesta.length() > 0) {
+System.out.println(sRespuesta);
+}
+}
+
+public static void preprocess_input() {
+sEntrada = cleanString(sEntrada);
+sEntrada = sEntrada.toUpperCase();
+sEntrada = " " + sEntrada + " ";
+}
+
+public static boolean bot_repeat() {
+return (sPrevResp.length() > 0 &&
+sRespuesta == sPrevResp);
+}
+
+public static boolean user_repeat() {
+return (sPrevEnt.length() > 0 &&
+((sEntrada == sPrevEnt) ||
+(sEntrada.indexOf(sPrevEnt) != -1) ||
+(sPrevEnt.indexOf(sEntrada) != -1)));
+}
+
+public static boolean bot_understand() {
+return respList.size() > 0;
+}
+
+public static boolean null_input() {
+return (sEntrada.length() == 0 && sPrevEnt.length() != 0);
+}
+
+public static boolean null_input_repetition() {
+return (sEntrada.length() == 0 && sPrevEnt.length() == 0);
+}
+
+public static boolean user_want_to_quit() {
+return (sEntrada.indexOf("HASTA LUEGO&quot != -1);
+
+}
+
+public static boolean user_want_to_quit2() {
+return (sEntrada.indexOf("NOS VEMOS&quot != -1);
+
+}
+
+public static boolean user_want_to_quit3() {
+return (sEntrada.indexOf("ADIOS&quot != -1);
+
+}
+
+public static boolean user_want_to_quit4() {
+return (sEntrada.indexOf("NOS VEMOS DESPUES&quot != -1);
+
+}
+
+public static boolean same_event() {
+return (sEvento.length() > 0 && sEvento == sPrevEvent);
+}
+
+public static boolean no_response() {
+return respList.size() == 0;
+}
+
+public static boolean same_input() {
+return (sEntrada.length() > 0 && sEntrada == sPrevEnt);
+}
+
+public static boolean similar_input() {
+return (sEntrada.length() > 0 &&
+(sEntrada.indexOf(sPrevEnt) != -1 ||
+sPrevEnt.indexOf(sEntrada) != -1));
+}
+
+static boolean isPunc(char ch) {
+return puncs.indexOf(ch) != -1;
+}
+
+// removes punctuation and redundant
+// spaces from the user's input
+static String cleanString(String str) {
+StringBuffer temp = new StringBuffer(str.length());
+char prevChar = 0;
+for(int i = 0; i < str.length(); ++i) {
+if((str.charAt(i) == ' ' && prevChar == ' ' ) || !isPunc(str.charAt(i))) {
+temp.append(str.charAt(i));
+prevChar = str.charAt(i);
+}
+else if(prevChar != ' ' && isPunc(str.charAt(i)))
+{
+temp.append(' ');
+prevChar = ' ';
+}
+}
+return temp.toString();
+}
+
+static String trimLR(String str, String delim)
+{
+StringBuffer temp = new StringBuffer(str);
+int index1 = temp.indexOf(delim);
+int index2 = temp.lastIndexOf(delim);
+if(index1 != -1)
+{
+temp.deleteCharAt(index1);
+index2--;
+}
+if(index2 > -1)
+{
+temp.deleteCharAt(index2);
+}
+return temp.toString();
+}
+
+/**
+* @param args
+*/
+public static void main(String[] args) throws Exception {
+// TODO Auto-generated method stub
+System.out.println("RobxOS esta basado en Chatterbot&quot;
+
+try {
+signon();
+while(!quit()) {
+get_input();
+respond();
+}
+}
+catch(Exception e) {
+e.printStackTrace();
+}
+}
+}
